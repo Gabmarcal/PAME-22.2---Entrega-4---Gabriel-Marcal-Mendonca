@@ -1,38 +1,28 @@
 from flask import Blueprint
 from .controller import *
 
-user_api = Blueprint("user_api","__name__")
+user_api = Blueprint("user_api",__name__)
 
-#users
+#/users_adm
 user_api.add_url_rule(
 
-    "/users",
-    view_func=UserController.as_view("users_controller"),
+    "/users_adm",
+    view_func=UserController_adm.as_view("users_controller_adm"),
     methods = ['POST','GET']
 )
 
-#users/id
+#/users_adm/id
 user_api.add_url_rule(
 
-    "/users/<int:id>",
-    view_func=UserDetails.as_view("users_details"),
+    "/users_adm/<int:id>",
+    view_func=UserDetails_adm.as_view("users_details_adm"),
     methods = ['GET','PUT','PATCH','DELETE']
 )
 
-#products
+#/users_client/id
 user_api.add_url_rule(
 
-    "/products",
-    view_func=ProductController.as_view("products_controller"),
-    methods = ['POST','GET']
+    "/users_client/<int:id>",
+    view_func=UserDetails_client.as_view("users_details_client"),
+    methods = ['GET','PATCH']
 )
-
-#products/id
-user_api.add_url_rule(
-
-    "/products/<int:id>",
-    view_func=ProductDetails.as_view("product_details"),
-    methods = ['GET','PUT','PATCH','DELETE']
-)
-
-#

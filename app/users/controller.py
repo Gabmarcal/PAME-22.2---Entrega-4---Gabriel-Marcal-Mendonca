@@ -2,8 +2,6 @@ from flask import request
 from flask.views import MethodView
 
 from .models import my_users as users
-from .models import my_products as products
-from .models import my_cart as carts
 
 from .schemas import *
 
@@ -11,17 +9,17 @@ def get_last_id_users():
     last_user = users[-1]
     return last_user['id']
 
-def get_last_id_products():
-    last_product = products[-1]
-    return last_product['id']
-
-class UserController(MethodView):
-     
+class UserController_adm(MethodView):
+    
     def post(self):
         schema = UserSchema()
         data = request.json
 
         data['id'] = get_last_id_users() +1
+
+        if data['tipo'] != 'cliente' or 'administrador':
+            print("erro!")
+            return{}, 400
 
         try:
             user = schema.dump(data)
@@ -29,7 +27,7 @@ class UserController(MethodView):
 
         except:
             print("erro!")
-            return{},400
+            return{}, 400
         
         return user, 201
     
@@ -37,8 +35,8 @@ class UserController(MethodView):
         schema=UserSchema()
         return schema.dump(users,many=True), 200
 
-class UserDetails(MethodView):
-    
+class UserDetails_adm(MethodView):
+
     def get(self,id):
         schema = UserSchema()
 
@@ -98,110 +96,39 @@ class UserDetails(MethodView):
                 users.remove(user)
                 return{}, 204
         return{}, 404
-    
-class ProductController(MethodView):
 
-    def post(self):
-        
-        schema = ProductSchema()
-        data = request.json
-
-        data['id'] = get_last_id_products() +1
-
-        try:
-            product = schema.dump(data)
-            products.append(product)
-
-        except:
-            print("erro!")
-            return{},400
-
-        return product, 201
-    
-    def get(self):
-        schema = ProductSchema()
-        return schema.dump(products,many=True), 200
-
-class ProductDetails(MethodView):
+class UserDetails_client(MethodView):
 
     def get(self,id):
-        schema = ProductSchema()
+        schema = UserSchema()
 
-        for product in products:
-            if product['id'] == id:
-                return schema.dump(product), 200
+        for user in users:
+            if user['id'] == id:
+                return schema.dump(user), 200
         return {}, 404
     
-    def put(self,id):
-        schema = ProductSchema()
-        data = request.json
-
-        productindex = -1
-
-        for product in products:
-            if product['id'] == id:
-                productindex = products.index(product)
-            
-        if productindex == -1:
-            return{}, 404
-        
-        data['id'] = id
-        new_product = schema.dump(data)
-        users[productindex] = new_product
-        return new_product
-    
     def patch(self,id):
-        schema = ProductSchema()
+        schema = UserSchema()
         data = request.json
 
-        productindex = -1
+        userindex = -1
 
-        for product in products:
-            if product['id'] == id:
-                productindex = products.index(product)
+        for user in users:
+            if user['id'] == id:
+                userindex = users.index(user)
             
-        if productindex == -1:
+        if userindex == -1:
             return{}, 404
         
-        product = products[productindex]
+        user = users[userindex]
 
-        preco = data.get('preco', product['preco'])
-        tipo = data.get('tipo', product['tipo'])
-        tamanho = data.get('tamanho', product['tamanho'])
-        quantidade = data.get('quantidade', product['quantidade'])
+        username = data.get('username', user['username'])
 
-        data['preco'] = preco
-        data['tipo'] = tipo
-        data['tamanho'] = tamanho
-        data['quantidade'] = quantidade
+        data['username'] = username
+        data['tipo'] = 'cliente'
         data['id'] = id
 
-        product = schema.dump(data)
-        products[productindex] = product
+        user = schema.dump(data)
+        users[userindex] = user
 
-        return product, 201
-    
-    def delete(self,id):
-        for product in products:
-            if product['id'] == id:
-                products.remove(product)
-                return{}, 204
-        return{}, 404
-
-class Cart(MethodView):
-    
-    def post(self):
-        schema = CartSchema()
-        data = request.json
-
-        data['id'] = get_last_id_users() + 1
-
-        try:
-            for num in range(data['id']): pass
-        #Criando codigo
-
-        except:
-            print("erro!")
-            return{},400
-        
-        return {}, 201
+        return user, 201
